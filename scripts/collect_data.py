@@ -167,11 +167,21 @@ def main():
     download_human_samples()
     
     # Create placeholder human samples for testing
-    print("Would you like to create placeholder 'human' samples for testing?")
-    print("(These are AI-generated with variation - NOT real human voices)")
-    response = input("Create placeholders? (y/n): ").strip().lower()
+    # Auto-create in non-interactive environments (deployment)
+    import sys
+    is_interactive = sys.stdin.isatty()
     
-    if response == 'y':
+    if is_interactive:
+        print("Would you like to create placeholder 'human' samples for testing?")
+        print("(These are AI-generated with variation - NOT real human voices)")
+        response = input("Create placeholders? (y/n): ").strip().lower()
+        should_create = (response == 'y')
+    else:
+        # Non-interactive (deployment) - auto-create placeholders
+        print("📢 Non-interactive mode detected - auto-creating placeholder samples")
+        should_create = True
+    
+    if should_create:
         create_simple_human_samples()
     
     print("\n" + "=" * 60)
