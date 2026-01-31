@@ -29,8 +29,8 @@ data/processed/
 *.flac
 
 # Models
-models/*.pkl
-models/*.joblib
+# models/*.pkl
+# models/*.joblib
 
 # Testing
 .pytest_cache/
@@ -44,3 +44,6 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+GUVI_TESTER_VALUES.txt
+models/training_history.jsonl
+MODEL_IMPROVEMENT_QUICKSTART.md

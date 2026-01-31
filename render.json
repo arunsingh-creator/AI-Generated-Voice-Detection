@@ -1,0 +1,26 @@
+{
+    "build": {
+        "command": "python scripts/deploy_train.py",
+        "cache": {
+            "paths": [
+                "models/*.pkl",
+                "models/*.joblib"
+            ]
+        }
+    },
+    "routes": [
+        {
+            "src": "/health",
+            "dest": "/health",
+            "methods": [
+                "GET"
+            ],
+            "cache": {
+                "ttl": 0
+            }
+        }
+    ],
+    "env": {
+        "PYTHON_VERSION": "3.10.0"
+    }
+}
