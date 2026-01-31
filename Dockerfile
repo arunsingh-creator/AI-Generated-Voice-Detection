@@ -48,5 +48,4 @@ HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=2 \
     CMD curl -f http://localhost:8000/health || exit 1
 
 # Fast startup with pre-loading
-CMD
-    uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --timeout-keep-alive 75
+CMD ["sh", "-c", "python scripts/deploy_train.py && uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 1 --timeout-keep-alive 75"]
