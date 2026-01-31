@@ -16,13 +16,8 @@ from app.services import (
     ClassificationError
 )
 
-# Use advanced feature extractor (63 features) to match enhanced model
-try:
-    from app.services.feature_extractor_advanced import extract_advanced_features, normalize_features
-    USE_ADVANCED_FEATURES = True
-except ImportError:
-    from app.services.feature_extractor import extract_features
-    USE_ADVANCED_FEATURES = False
+# Use environment-aware feature extraction
+from app.services.feature_selector import extract_features, USE_ADVANCED
 from app.config import settings
 
 router = APIRouter()
@@ -62,13 +57,8 @@ async def detect_voice(
         # Step 1: Decode Base64 audio to waveform
         waveform, duration = decode_base64_to_waveform(request.audioBase64)
         
-        # Step 2: Extract acoustic features
-        # Extract features using advanced extractor if available
-        if USE_ADVANCED_FEATURES:
-            features = extract_advanced_features(waveform, sr=settings.SAMPLE_RATE)
-            features = normalize_features(features)
-        else:
-            features = extract_features(waveform, sr=settings.SAMPLE_RATE)
+        # Step 2: Extract acoustic features (environment-aware)
+        features = extract_features(waveform, sr=settings.SAMPLE_RATE)
         
         # Step 3: Classify using ML model or heuristics
         classifier = get_classifier()
