@@ -27,31 +27,34 @@ def main():
     
     print("\n⚠ Models not found - running training...")
     
+    
     # Check if we have training data
     data_dir = Path("data/raw")
-    has_data = (data_dir / "ai").exists() and (data_dir / "human").exists()
+    ai_dir = data_dir / "ai"
+    human_dir = data_dir / "human"
     
-    if not has_data:
-        print("\n📢 No training data found - generating samples...")
-        from scripts.collect_data import main as collect_data
-        collect_data()
+    # Count actual audio files
+    ai_count = len(list(ai_dir.glob("*.mp3"))) if ai_dir.exists() else 0
+    human_count = len(list(human_dir.glob("*.mp3"))) if human_dir.exists() else 0
     
-    # Train the model
-    print("\n📢 Training model...")
-    try:
-        # Try enhanced training first
-        from scripts.train_model_enhanced import main as train_enhanced
-        train_enhanced()
-    except Exception as e:
-        print(f"⚠ Enhanced training failed: {e}")
-        print("  Falling back to basic training...")
+    if ai_count == 0 or human_count == 0:
+        print(f"\n📢 Training data insufficient (AI: {ai_count}, Human: {human_count})")
+        print("   Generating samples with gTTS...")
         try:
-            from scripts.train_model import main as train_basic
-            train_basic()
-        except Exception as e2:
-            print(f"✗ Basic training also failed: {e2}")
-            print("  API will use heuristic classification")
-            return
+            from scripts.collect_data import main as collect_data
+            collect_data()
+        except Exception as e:
+            print(f"⚠ Sample generation failed: {e}")
+    
+    # Train the model using basic training (faster for deployment)
+    print("\n📢 Training model with basic trainer...")
+    try:
+        from scripts.train_model import main as train_basic
+        train_basic()
+        print("✓ Model trained successfully!")
+    except Exception as e:
+        print(f"⚠ Training failed: {e}")
+        print("  API will use heuristic classification")
     
     print("\n✓ Model training complete!")
     print("="*60)
