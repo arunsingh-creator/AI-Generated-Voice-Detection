@@ -19,24 +19,17 @@ IS_PRODUCTION = ENV_VAR == 'production' or IS_RENDER or PORT != '8000'
 models_dir = Path("models")
 has_enhanced_model = (models_dir / "voice_classifier.pkl").exists()
 
-# Decision logic: Use basic features by default (safer)
-# Only use advanced if explicitly in development AND have enhanced model
-USE_BASIC = True  # Default to basic for safety
-
-if not IS_PRODUCTION and not IS_RENDER:
-    # Likely local development - check if we have enhanced model
-    try:
-        from app.services.feature_extractor_advanced import extract_advanced_features, normalize_features
-        extract_features = lambda waveform, sr: normalize_features(extract_advanced_features(waveform, sr))
-        USE_BASIC = False
-        print("🔧 Development: Using advanced features (63)")
-    except ImportError:
-        from app.services.feature_extractor import extract_features
-        print("🔧 Development fallback: Using basic features (48)")
-else:
-    # Production/Render - always use basic features
+# Decision logic: Prefer Advanced features (63) since we deployed the advanced model
+# Check if advanced extractor is importable (it should be)
+try:
+    from app.services.feature_extractor_advanced import extract_advanced_features, normalize_features
+    extract_features = lambda waveform, sr: normalize_features(extract_advanced_features(waveform, sr))
+    USE_BASIC = False
+    print("🔧 Feature Selector: Using ADVANCED features (63) - Matches deployed model")
+except ImportError:
     from app.services.feature_extractor import extract_features
-    print(f"🔧 Production (Render={IS_RENDER}): Using basic features (48)")
+    USE_BASIC = True
+    print("🔧 Feature Selector: Fallback to BASIC features (48) - Advanced module missing")
 
 USE_ADVANCED = not USE_BASIC
 
